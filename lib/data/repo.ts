@@ -22,6 +22,26 @@ import type {
 
 // ---------- contacts & goals ----------
 
+// Wipes every lead/contact/activity record while leaving the property
+// listings alone. Meant for clearing out test data before real use — not
+// exposed anywhere except the admin view, and gated behind a confirmation
+// dialog in the UI.
+export async function resetAllLeadsRepo(): Promise<void> {
+  await writeStore((store) => {
+    store.contacts = [];
+    store.clientGoals = [];
+    store.comparisons = [];
+    store.leadEvents = [];
+    store.showingRequests = [];
+    store.checklistItems = [];
+    store.homeProfiles = [];
+    store.maintenanceReminders = [];
+    store.referrals = [];
+    store.messages = [];
+    store.investorAnalyses = [];
+  });
+}
+
 export async function createContact(input: {
   name: string;
   email: string;

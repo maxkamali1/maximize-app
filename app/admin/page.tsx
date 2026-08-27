@@ -1,6 +1,7 @@
 import { BrandHeader } from "@/components/BrandHeader";
+import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
 import { listContactsWithGoals } from "@/lib/data/repo";
-import { markAttended } from "@/lib/actions";
+import { markAttended, resetAllLeads } from "@/lib/actions";
 import type { LeadEventType } from "@/lib/data/types";
 
 // This reads the live contacts/events store on every request. Without this,
@@ -112,7 +113,19 @@ export default async function AdminPage() {
         </section>
 
         <section>
-          <h2 className="font-display text-2xl font-semibold mb-4">All contacts</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-2xl font-semibold">All contacts</h2>
+            {rows.length > 0 && (
+              <form action={resetAllLeads}>
+                <ConfirmSubmitButton
+                  confirmText={`This permanently deletes all ${rows.length} contact(s) and their activity — showings, messages, checklists, everything. Property listings are kept. This can't be undone. Continue?`}
+                  className="font-data text-xs uppercase tracking-wide text-ink-faint hover:text-warn transition-colors underline decoration-dotted"
+                >
+                  Clear test data
+                </ConfirmSubmitButton>
+              </form>
+            )}
+          </div>
           <div className="rounded-xl border border-line bg-surface overflow-x-auto">
             <table className="w-full text-sm min-w-[640px]">
               <thead>
