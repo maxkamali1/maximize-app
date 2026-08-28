@@ -20,7 +20,6 @@ import {
   sendMessage as sendMessageRepo,
   requestValuation as requestValuationRepo,
   saveInvestorAnalysis as saveInvestorAnalysisRepo,
-  resetAllLeadsRepo,
 } from "./data/repo";
 import type { ComparisonItem, GoalType, PreferredContactMethod } from "./data/types";
 
@@ -31,7 +30,7 @@ const DASHBOARD_PATH: Record<GoalType, string> = {
   selling: "/seller",
   homeowner: "/homeowner",
   investing: "/investor",
-  exploring: "/explore",
+  exploring: "/",
 };
 
 export async function getCurrentContactId(): Promise<string | undefined> {
@@ -216,42 +215,6 @@ export async function submitInvestorOnboarding(formData: FormData) {
   redirect("/investor");
 }
 
-// Exploring is deliberately the lightest onboarding of the five — just
-// enough to say hello and keep in touch, no goal-specific questions, no
-// pressure to commit to a track yet (Blueprint's "no pressure" principle
-// for undecided leads).
-export async function submitExploringOnboarding(formData: FormData) {
-  const name = String(formData.get("name") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
-  const phone = String(formData.get("phone") ?? "").trim();
-  const preferredContactMethod = (String(formData.get("preferredContactMethod") ?? "email") ||
-    "email") as PreferredContactMethod;
-  const consentMarketing = formData.get("consentMarketing") === "on";
-
-  if (!name || !email) {
-    throw new Error("Name and email are required.");
-  }
-
-  const contact = await createContact({
-    name,
-    email,
-    phone,
-    source: "exploring_onboarding",
-    preferredContactMethod,
-    consentMarketing,
-  });
-
-  await createClientGoal({
-    contactId: contact.id,
-    goalType: "exploring",
-    context: {},
-  });
-
-  await logLeadEvent({ contactId: contact.id, eventType: "onboarded", eventMeta: { goal: "exploring" } });
-  await setContactCookie(contact.id);
-  redirect("/explore");
-}
-
 export async function logCalculatorUse(calculator: string) {
   const contactId = await getCurrentContactId();
   if (!contactId) return;
@@ -324,17 +287,13 @@ export async function requestValuationAction(formData: FormData) {
   redirect(`${DASHBOARD_PATH[from]}?requested=1`);
 }
 
-// Used from more than one dashboard now (Homeowner, Exploring), so it reads
-// a hidden "from" field the same way requestValuationAction does, instead
-// of always sending the sender back to /homeowner.
 export async function sendMessageAction(formData: FormData) {
   const contactId = await getCurrentContactId();
   if (!contactId) redirect("/");
-  const from = String(formData.get("from") ?? "homeowner") as GoalType;
   const body = String(formData.get("body") ?? "").trim();
-  if (!body) redirect(DASHBOARD_PATH[from]);
+  if (!body) redirect("/homeowner");
   await sendMessageRepo({ contactId, body });
-  redirect(`${DASHBOARD_PATH[from]}?sent=1`);
+  redirect("/homeowner?sent=1");
 }
 
 export async function submitReferral(formData: FormData) {
@@ -371,14 +330,4 @@ export async function submitInvestorAnalysis(formData: FormData) {
   });
 
   redirect("/investor/compare?saved=1");
-}
-
-// Deletes every contact/lead/activity record so a fresh Vercel deployment
-// (or an owner who's done testing) can start clean. Property listings are
-// untouched. The confirm() dialog protecting this lives in the client
-// component that renders the button, not here — this action trusts its
-// caller.
-export async function resetAllLeads() {
-  await resetAllLeadsRepo();
-  redirect("/admin");
 }

@@ -1,11 +1,19 @@
+import Link from "next/link";
 import { BrandHeader } from "@/components/BrandHeader";
 import {
   submitBuyerOnboarding,
   submitSellerOnboarding,
   submitHomeownerOnboarding,
   submitInvestorOnboarding,
-  submitExploringOnboarding,
 } from "@/lib/actions";
+
+const GOAL_LABELS: Record<string, string> = {
+  buying: "Buying",
+  selling: "Selling",
+  homeowner: "Homeowner",
+  investing: "Investing",
+  exploring: "Just exploring",
+};
 
 export default async function StartGoalPage({
   params,
@@ -13,6 +21,33 @@ export default async function StartGoalPage({
   params: Promise<{ goal: string }>;
 }) {
   const { goal } = await params;
+  const label = GOAL_LABELS[goal] ?? goal;
+
+  if (goal === "exploring") {
+    return (
+      <div className="flex flex-col flex-1">
+        <BrandHeader />
+        <main className="flex-1 mx-auto max-w-2xl px-6 py-20 text-center">
+          <p className="font-data text-xs tracking-wide uppercase text-ink-faint mb-3">
+            {label}
+          </p>
+          <h1 className="font-display text-3xl font-semibold mb-4">
+            This experience is being built next.
+          </h1>
+          <p className="text-ink-soft mb-8">
+            Buying, Selling, Homeowner, and Investing are all live — Exploring is next
+            up. In the meantime, Max is one message away.
+          </p>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-full border border-line-strong px-5 py-2.5 text-sm font-medium hover:border-accent hover:text-accent transition-colors"
+          >
+            ← Back to start
+          </Link>
+        </main>
+      </div>
+    );
+  }
 
   const config = {
     buying: {
@@ -43,14 +78,7 @@ export default async function StartGoalPage({
       action: submitInvestorOnboarding,
       body: <InvestingFields />,
     },
-    exploring: {
-      eyebrow: "Just exploring · thirty seconds",
-      title: "No forms, no pressure — just a way to stay in touch.",
-      lede: "You don't need to know yet whether you're buying, selling, or just curious. Look around, and message Max anytime.",
-      action: submitExploringOnboarding,
-      body: null,
-    },
-  }[goal as "buying" | "selling" | "homeowner" | "investing" | "exploring"];
+  }[goal as "buying" | "selling" | "homeowner" | "investing"];
 
   if (!config) {
     return (

@@ -35,7 +35,7 @@ const GOALS: {
     slug: "exploring",
     title: "I'm Just Exploring",
     description: "No pressure — poke around, ask a question, see what's useful.",
-    ready: true,
+    ready: false,
   },
 ];
 

@@ -110,7 +110,6 @@ export default async function HomeownerDashboard({
             Any real estate question — no need for it to be urgent.
           </p>
           <form action={sendMessageAction} className="flex flex-col gap-2">
-            <input type="hidden" name="from" value="homeowner" />
             <textarea
               name="body"
               rows={2}

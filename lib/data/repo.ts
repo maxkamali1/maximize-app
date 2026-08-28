@@ -1,5 +1,4 @@
 import { readStore, writeStore, newId } from "./store";
-import { notifyMaxOfLeadEvent } from "../email";
 import type {
   Contact,
   ClientGoal,
@@ -22,26 +21,6 @@ import type {
 } from "./types";
 
 // ---------- contacts & goals ----------
-
-// Wipes every lead/contact/activity record while leaving the property
-// listings alone. Meant for clearing out test data before real use — not
-// exposed anywhere except the admin view, and gated behind a confirmation
-// dialog in the UI.
-export async function resetAllLeadsRepo(): Promise<void> {
-  await writeStore((store) => {
-    store.contacts = [];
-    store.clientGoals = [];
-    store.comparisons = [];
-    store.leadEvents = [];
-    store.showingRequests = [];
-    store.checklistItems = [];
-    store.homeProfiles = [];
-    store.maintenanceReminders = [];
-    store.referrals = [];
-    store.messages = [];
-    store.investorAnalyses = [];
-  });
-}
 
 export async function createContact(input: {
   name: string;
@@ -123,23 +102,6 @@ export async function logLeadEvent(input: {
   await writeStore((store) => {
     store.leadEvents.push(event);
   });
-
-  // "Used the calculator" fires on ordinary slider adjustments and would
-  // make this noisy rather than useful — every other event type is a real
-  // signal worth an email the moment it happens.
-  if (event.eventType !== "used_calculator") {
-    const contact = await getContact(input.contactId);
-    if (contact) {
-      // Awaited on purpose, even though it adds a brief moment before the
-      // redirect: hosted serverless functions (Vercel included) can freeze
-      // the moment a response is sent, which kills any email send still
-      // in flight if it isn't awaited. notifyMaxOfLeadEvent already
-      // swallows its own errors, so this never throws or blocks the lead
-      // from being saved.
-      await notifyMaxOfLeadEvent(event, contact);
-    }
-  }
-
   return event;
 }
 

@@ -1,9 +1,7 @@
 import { BrandHeader } from "@/components/BrandHeader";
-import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
 import { listContactsWithGoals } from "@/lib/data/repo";
-import { markAttended, resetAllLeads } from "@/lib/actions";
+import { markAttended } from "@/lib/actions";
 import type { LeadEventType } from "@/lib/data/types";
-import { EVENT_LABEL } from "@/lib/data/labels";
 
 // This reads the live contacts/events store on every request. Without this,
 // Next.js has no signal that the page depends on runtime data (no cookies,
@@ -22,6 +20,17 @@ const PRIORITY: Record<LeadEventType, number> = {
   saved_investor_analysis: 3,
   used_calculator: 3,
   onboarded: 4,
+};
+
+const EVENT_LABEL: Record<LeadEventType, string> = {
+  requested_showing: "Requested a showing",
+  requested_valuation: "Requested a home valuation",
+  sent_message: "Sent a message",
+  submitted_referral: "Sent a referral your way",
+  saved_comparison: "Saved a property comparison",
+  saved_investor_analysis: "Saved an investment analysis",
+  used_calculator: "Used the affordability calculator",
+  onboarded: "New lead — just onboarded",
 };
 
 function timeAgo(iso: string): string {
@@ -103,19 +112,7 @@ export default async function AdminPage() {
         </section>
 
         <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display text-2xl font-semibold">All contacts</h2>
-            {rows.length > 0 && (
-              <form action={resetAllLeads}>
-                <ConfirmSubmitButton
-                  confirmText={`This permanently deletes all ${rows.length} contact(s) and their activity — showings, messages, checklists, everything. Property listings are kept. This can't be undone. Continue?`}
-                  className="font-data text-xs uppercase tracking-wide text-ink-faint hover:text-warn transition-colors underline decoration-dotted"
-                >
-                  Clear test data
-                </ConfirmSubmitButton>
-              </form>
-            )}
-          </div>
+          <h2 className="font-display text-2xl font-semibold mb-4">All contacts</h2>
           <div className="rounded-xl border border-line bg-surface overflow-x-auto">
             <table className="w-full text-sm min-w-[640px]">
               <thead>
