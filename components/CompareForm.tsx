@@ -169,7 +169,7 @@ export function CompareForm({
         <button
           type="submit"
           disabled={selected.size === 0}
-          className="rounded-full bg-ink text-paper px-6 py-3 text-sm font-medium hover:bg-accent transition-colors disabled:opacity-40 disabled:pointer-events-none"
+          className="rounded-full bg-accent text-accent-ink px-6 py-3 text-sm font-medium hover:bg-accent-strong transition-colors disabled:opacity-40 disabled:pointer-events-none"
         >
           Save comparison
         </button>

@@ -145,7 +145,7 @@ export function InvestorAnalyzer() {
 
         <button
           type="submit"
-          className="rounded-full bg-ink text-paper px-5 py-2.5 text-sm font-medium hover:bg-accent transition-colors self-start"
+          className="rounded-full bg-accent text-accent-ink px-5 py-2.5 text-sm font-medium hover:bg-accent-strong transition-colors self-start"
         >
           Save this analysis
         </button>

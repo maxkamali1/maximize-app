@@ -113,7 +113,7 @@ export default async function StartGoalPage({
 
           <button
             type="submit"
-            className="mt-2 self-start rounded-full bg-ink text-paper px-6 py-3 text-sm font-medium hover:bg-accent transition-colors"
+            className="mt-2 self-start rounded-full bg-accent text-accent-ink px-6 py-3 text-sm font-medium hover:bg-accent-strong transition-colors"
           >
             Take me to my dashboard →
           </button>

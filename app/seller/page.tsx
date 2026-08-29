@@ -83,7 +83,7 @@ export default async function SellerDashboard({
               <input type="hidden" name="from" value="selling" />
               <button
                 type="submit"
-                className="rounded-full bg-ink text-paper px-5 py-2.5 text-sm font-medium hover:bg-accent transition-colors"
+                className="rounded-full bg-accent text-accent-ink px-5 py-2.5 text-sm font-medium hover:bg-accent-strong transition-colors"
               >
                 Request a valuation
               </button>

@@ -72,7 +72,7 @@ export default async function ExplorePage({
           />
           <button
             type="submit"
-            className="self-start rounded-full bg-ink text-paper px-4 py-2 text-xs font-medium hover:bg-accent transition-colors"
+            className="self-start rounded-full bg-accent text-accent-ink px-4 py-2 text-xs font-medium hover:bg-accent-strong transition-colors"
           >
             Send
           </button>

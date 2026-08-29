@@ -54,7 +54,7 @@ export default function ShowingPage() {
         </div>
         <button
           type="submit"
-          className="self-start rounded-full bg-ink text-paper px-6 py-3 text-sm font-medium hover:bg-accent transition-colors"
+          className="self-start rounded-full bg-accent text-accent-ink px-6 py-3 text-sm font-medium hover:bg-accent-strong transition-colors"
         >
           Send request
         </button>

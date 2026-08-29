@@ -72,7 +72,7 @@ export default async function AdminPage() {
                   className={`rounded-xl border p-5 flex items-center justify-between gap-4 flex-wrap ${
                     event.eventType === "requested_showing" ||
                     event.eventType === "requested_valuation"
-                      ? "border-accent bg-accent-soft/30"
+                      ? "border-warn bg-warn/10"
                       : "border-line bg-surface"
                   }`}
                 >
