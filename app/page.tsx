@@ -1,10 +1,6 @@
 import Link from "next/link";
 import { BrandHeader } from "@/components/BrandHeader";
 
-// Small, low-opacity real-estate icons scattered across the navy hero —
-// decorative only (aria-hidden, no pointer events), kept out of the way of
-// the headline/paragraph text and sized/faded down so they read as texture,
-// not clutter.
 const HERO_EMOJI: { icon: string; top: string; left: string; size: string; rotate: number; opacity: string }[] = [
   { icon: "🏠", top: "22%", left: "70%", size: "text-4xl", rotate: -10, opacity: "opacity-15" },
   { icon: "🤝", top: "14%", left: "88%", size: "text-3xl", rotate: 8, opacity: "opacity-15" },
@@ -55,13 +51,6 @@ const GOALS: {
   },
 ];
 
-// Option B: a navy hero BAND (header + welcome intro) with a scattering of
-// small, faint real-estate emoji behind the text, then the page transitions
-// into the same light background every other screen in the app uses — so
-// the strong first impression doesn't create a jarring dark-to-light jump
-// the moment someone picks a persona. Cards sit on a soft light-blue tint;
-// red stays reserved for admin/urgent things elsewhere in the app, so
-// badges here are solid blue instead.
 export default function Home() {
   return (
     <div className="flex flex-col flex-1">
@@ -136,10 +125,6 @@ export default function Home() {
             not for public use.
           </span>
           <div className="flex items-center gap-4">
-            <Link href="/disclaimer" className="underline hover:text-accent">
-              Disclaimer
-            </Link>
-            <div className="flex items-center gap-4">
             <Link href="/disclaimer" className="underline hover:text-accent">
               Disclaimer
             </Link>
