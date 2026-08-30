@@ -7,12 +7,6 @@ import { isAdminAuthenticated } from "@/lib/admin-auth";
 import type { LeadEventType } from "@/lib/data/types";
 import { EVENT_LABEL } from "@/lib/data/labels";
 
-// This reads the live contacts/events store on every request. Without this,
-// Next.js has no signal that the page depends on runtime data (no cookies,
-// no searchParams) and will happily freeze it as static HTML from build
-// time — which silently shows an empty admin view forever. Caught this by
-// actually clicking through the app before calling it done, not by reading
-// the code.
 export const dynamic = "force-dynamic";
 
 const PRIORITY: Record<LeadEventType, number> = {
