@@ -40,10 +40,6 @@ export async function getCurrentContactId(): Promise<string | undefined> {
   return store.get(CONTACT_COOKIE)?.value;
 }
 
-// Every persona layout calls this once. It answers two questions at the
-// same time: "is anyone signed in" and "are they in the right place" — if
-// someone with an active Buyer goal lands on /seller, they're bounced to
-// /buyer rather than shown someone else's kind of dashboard.
 export async function requireGoal(expected: GoalType): Promise<string> {
   const contactId = await getCurrentContactId();
   if (!contactId) redirect("/");
@@ -63,9 +59,6 @@ async function setContactCookie(contactId: string) {
   });
 }
 
-// Goal-based onboarding: creates the contact + their active goal in one step,
-// then drops a cookie so the dashboard knows who's looking at it. No account
-// or password yet on purpose — see Blueprint section 06 (V1 buyer scope).
 export async function submitBuyerOnboarding(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
@@ -104,8 +97,6 @@ export async function submitBuyerOnboarding(formData: FormData) {
   redirect("/buyer");
 }
 
-// Same shape as the buyer flow: one form, one contact, one active goal, then
-// straight to a dashboard already carrying their context.
 export async function submitSellerOnboarding(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
@@ -217,10 +208,6 @@ export async function submitInvestorOnboarding(formData: FormData) {
   redirect("/investor");
 }
 
-// Exploring is deliberately the lightest onboarding of the five — just
-// enough to say hello and keep in touch, no goal-specific questions, no
-// pressure to commit to a track yet (Blueprint's "no pressure" principle
-// for undecided leads).
 export async function submitExploringOnboarding(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
@@ -318,9 +305,6 @@ export async function markAttended(eventId: string) {
   redirect("/admin");
 }
 
-// Toggling a checklist/reminder item re-renders the page in place
-// (revalidatePath) instead of redirecting — a checkbox click shouldn't feel
-// like a page navigation.
 export async function toggleChecklist(itemId: string) {
   await toggleChecklistItemRepo(itemId);
   revalidatePath("/seller");
@@ -339,9 +323,6 @@ export async function requestValuationAction(formData: FormData) {
   redirect(`${DASHBOARD_PATH[from]}?requested=1`);
 }
 
-// Used from more than one dashboard now (Homeowner, Exploring), so it reads
-// a hidden "from" field the same way requestValuationAction does, instead
-// of always sending the sender back to /homeowner.
 export async function sendMessageAction(formData: FormData) {
   const contactId = await getCurrentContactId();
   if (!contactId) redirect("/");
@@ -388,11 +369,6 @@ export async function submitInvestorAnalysis(formData: FormData) {
   redirect("/investor/compare?saved=1");
 }
 
-// Deletes every contact/lead/activity record so a fresh Vercel deployment
-// (or an owner who's done testing) can start clean. Property listings are
-// untouched. The confirm() dialog protecting this lives in the client
-// component that renders the button, not here — this action trusts its
-// caller.
 export async function resetAllLeads() {
   if (!(await isAdminAuthenticated())) redirect("/admin/login");
   await resetAllLeadsRepo();
