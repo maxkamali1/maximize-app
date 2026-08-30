@@ -23,6 +23,7 @@ import {
   resetAllLeadsRepo,
 } from "./data/repo";
 import type { ComparisonItem, GoalType, PreferredContactMethod } from "./data/types";
+import { verifyAdminCode, startAdminSession, endAdminSession, isAdminAuthenticated } from "./admin-auth";
 
 const CONTACT_COOKIE = "maximize_contact_id";
 
@@ -298,7 +299,21 @@ export async function submitShowingRequest(formData: FormData) {
   redirect("/buyer?showingRequested=1");
 }
 
+export async function adminLoginAction(formData: FormData) {
+  const code = String(formData.get("code") ?? "");
+  const ok = await verifyAdminCode(code);
+  if (!ok) redirect("/admin/login?error=1");
+  await startAdminSession();
+  redirect("/admin");
+}
+
+export async function adminLogoutAction() {
+  await endAdminSession();
+  redirect("/admin/login");
+}
+
 export async function markAttended(eventId: string) {
+  if (!(await isAdminAuthenticated())) redirect("/admin/login");
   await markEventAttended(eventId);
   redirect("/admin");
 }
@@ -379,6 +394,7 @@ export async function submitInvestorAnalysis(formData: FormData) {
 // component that renders the button, not here — this action trusts its
 // caller.
 export async function resetAllLeads() {
+  if (!(await isAdminAuthenticated())) redirect("/admin/login");
   await resetAllLeadsRepo();
   redirect("/admin");
 }

@@ -1,7 +1,9 @@
+import { redirect } from "next/navigation";
 import { BrandHeader } from "@/components/BrandHeader";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
 import { listContactsWithGoals } from "@/lib/data/repo";
-import { markAttended, resetAllLeads } from "@/lib/actions";
+import { markAttended, resetAllLeads, adminLogoutAction } from "@/lib/actions";
+import { isAdminAuthenticated } from "@/lib/admin-auth";
 import type { LeadEventType } from "@/lib/data/types";
 import { EVENT_LABEL } from "@/lib/data/labels";
 
@@ -34,6 +36,8 @@ function timeAgo(iso: string): string {
 }
 
 export default async function AdminPage() {
+  if (!(await isAdminAuthenticated())) redirect("/admin/login");
+
   const rows = await listContactsWithGoals();
 
   const attention = rows
@@ -53,9 +57,17 @@ export default async function AdminPage() {
       <BrandHeader eyebrow="Admin — internal only" />
       <main className="flex-1 mx-auto max-w-5xl w-full px-6 py-10 flex flex-col gap-12">
         <section>
-          <p className="font-data text-xs tracking-wide uppercase text-ink-faint mb-2">
-            Today
-          </p>
+          <div className="flex items-start justify-between gap-4 mb-2">
+            <p className="font-data text-xs tracking-wide uppercase text-ink-faint">Today</p>
+            <form action={adminLogoutAction}>
+              <button
+                type="submit"
+                className="font-data text-xs uppercase tracking-wide text-ink-faint hover:text-accent transition-colors underline decoration-dotted"
+              >
+                Log out
+              </button>
+            </form>
+          </div>
           <h1 className="font-display text-3xl font-semibold mb-6">
             Who needs your attention today?
           </h1>
