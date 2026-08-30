@@ -139,6 +139,10 @@ export default function Home() {
             <Link href="/disclaimer" className="underline hover:text-accent">
               Disclaimer
             </Link>
+            <div className="flex items-center gap-4">
+            <Link href="/disclaimer" className="underline hover:text-accent">
+              Disclaimer
+            </Link>
             <Link href="/admin" className="underline hover:text-accent">
               Max&rsquo;s view →
             </Link>
