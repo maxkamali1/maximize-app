@@ -121,8 +121,7 @@ export default function Home() {
       <footer className="border-t border-line bg-paper">
         <div className="mx-auto max-w-5xl px-6 py-6 text-xs text-ink-faint font-data flex items-center justify-between flex-wrap gap-2">
           <span>
-            MAXimize Team &middot; RE/MAX West Realty Inc., Brokerage &middot; Prototype build,
-            not for public use.
+            MAXimize Team &middot; RE/MAX West Realty Inc., Brokerage
           </span>
           <div className="flex items-center gap-4">
             <Link href="/disclaimer" className="underline hover:text-accent">
