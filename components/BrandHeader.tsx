@@ -12,7 +12,7 @@ export function BrandHeader({ eyebrow, dark }: { eyebrow?: string; dark?: boolea
               dark ? "text-white group-hover:text-blue-200" : "text-ink group-hover:text-accent"
             }`}
           >
-            MAXimize
+            MAXimize Your Success
           </span>
           <span
             className={`font-data text-[0.65rem] tracking-wide uppercase ${
