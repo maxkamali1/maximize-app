@@ -19,8 +19,17 @@ export function BrandHeader({ eyebrow, dark }: { eyebrow?: string; dark?: boolea
               dark ? "text-white/60" : "text-ink-faint"
             }`}
           >
-            {eyebrow ?? "RE/MAX West Realty Inc."}
+            {eyebrow ?? "Max Kamali, Broker"}
           </span>
+          {!eyebrow && (
+            <span
+              className={`font-data text-[0.65rem] tracking-wide uppercase ${
+                dark ? "text-white/60" : "text-ink-faint"
+              }`}
+            >
+              MAXimize Team Leader
+            </span>
+          )}
         </Link>
         <p className={`hidden sm:block font-display italic text-sm ${dark ? "text-blue-200" : "text-accent"}`}>
           &ldquo;Your Decision &amp; Our Commitment.&rdquo;
