@@ -127,6 +127,9 @@ export default function Home() {
             <Link href="/disclaimer" className="underline hover:text-accent">
               Disclaimer
             </Link>
+            <Link href="/privacy" className="underline hover:text-accent">
+              Privacy Policy
+            </Link>
             <Link href="/admin" className="underline hover:text-accent">
               Max&rsquo;s view →
             </Link>
