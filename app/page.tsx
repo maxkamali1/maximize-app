@@ -82,8 +82,7 @@ export default function Home() {
               What brings you here today?
             </h1>
             <p className="max-w-lg text-blue-100/80">
-              Pick the one that fits — everything after this is built around it. No account
-              needed yet, and nothing here replaces a real conversation with your Realtor.
+              Pick the one that fits — everything after this is built around it.
             </p>
           </section>
         </div>
