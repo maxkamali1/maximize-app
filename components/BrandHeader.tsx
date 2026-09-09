@@ -4,8 +4,15 @@ import Link from "next/link";
 // this with no props and gets the ordinary light header, unaffected.
 export function BrandHeader({ eyebrow, dark }: { eyebrow?: string; dark?: boolean }) {
   return (
-    <header className={dark ? "border-b border-white/15" : "border-b border-line"}>
-      <div className="mx-auto max-w-5xl px-6 py-6 flex items-center justify-between gap-4">
+    // `pt-[env(safe-area-inset-top)]` clears the iPhone notch/Dynamic
+    // Island: Capacitor's WKWebView draws edge-to-edge behind it, so
+    // without this the wordmark renders underneath the status bar. Falls
+    // back to 0 on browsers/devices with no notch, so the extra `pt-4`
+    // keeps a small, consistent gap above the header everywhere.
+    <header
+      className={`pt-[env(safe-area-inset-top)] ${dark ? "border-b border-white/15" : "border-b border-line"}`}
+    >
+      <div className="mx-auto max-w-5xl px-6 pt-4 pb-6 flex items-center justify-between gap-4">
         <Link href="/" className="flex flex-col leading-tight group">
           <span
             className={`font-display text-lg font-semibold transition-colors ${

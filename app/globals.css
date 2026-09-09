@@ -104,9 +104,15 @@
   }
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   background: var(--paper);
   color: var(--ink);
+  overflow-x: hidden;
+  width: 100%;
 }
 
 h1,
