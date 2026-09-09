@@ -4,15 +4,17 @@ import Link from "next/link";
 // this with no props and gets the ordinary light header, unaffected.
 export function BrandHeader({ eyebrow, dark }: { eyebrow?: string; dark?: boolean }) {
   return (
-    // `pt-[env(safe-area-inset-top)]` clears the iPhone notch/Dynamic
-    // Island: Capacitor's WKWebView draws edge-to-edge behind it, so
-    // without this the wordmark renders underneath the status bar. Falls
-    // back to 0 on browsers/devices with no notch, so the extra `pt-4`
-    // keeps a small, consistent gap above the header everywhere.
+    // Capacitor's WKWebView draws edge-to-edge behind the status bar/
+    // Dynamic Island, so without top clearance the wordmark renders
+    // underneath it. `env(safe-area-inset-top)` is the "correct" value for
+    // this, but a fixed 3.25rem floor guarantees clearance even on setups
+    // where that value doesn't get reported (plain browsers just use the
+    // floor, since env() resolves to 0 there).
     <header
-      className={`pt-[env(safe-area-inset-top)] ${dark ? "border-b border-white/15" : "border-b border-line"}`}
+      className={dark ? "border-b border-white/15" : "border-b border-line"}
+      style={{ paddingTop: "max(3.25rem, env(safe-area-inset-top))" }}
     >
-      <div className="mx-auto max-w-5xl px-6 pt-4 pb-6 flex items-center justify-between gap-4">
+      <div className="mx-auto max-w-5xl px-6 pt-2 pb-6 flex items-center justify-between gap-4">
         <Link href="/" className="flex flex-col leading-tight group">
           <span
             className={`font-display text-lg font-semibold transition-colors ${
