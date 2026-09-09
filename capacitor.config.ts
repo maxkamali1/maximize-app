@@ -12,7 +12,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 // even after the web domain switch.
 const config: CapacitorConfig = {
   appId: 'com.maximizeteam.app',
-  appName: 'MAXimize',
+  appName: 'iHome Max',
   webDir: 'public',
   server: {
     url: 'https://maximize-app1.vercel.app',
