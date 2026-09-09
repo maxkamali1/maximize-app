@@ -124,3 +124,18 @@ export default function Home() {
             MAXimize Team &middot; RE/MAX West Realty Inc., Brokerage
           </span>
           <div className="flex items-center gap-4">
+            <Link href="/disclaimer" className="underline hover:text-accent">
+              Disclaimer
+            </Link>
+            <Link href="/privacy" className="underline hover:text-accent">
+              Privacy Policy
+            </Link>
+            <Link href="/admin" className="underline hover:text-accent">
+              Max&rsquo;s view →
+            </Link>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
