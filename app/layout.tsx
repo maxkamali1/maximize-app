@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { NativeSplashHide } from "@/components/NativeSplashHide";
 
 export const metadata: Metadata = {
   title: "MAXimize | RE/MAX West Realty Inc.",
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="h-full">
       <body className="min-h-full flex flex-col font-body text-[16px] leading-relaxed antialiased bg-paper text-ink">
+        <NativeSplashHide />
         {children}
       </body>
     </html>

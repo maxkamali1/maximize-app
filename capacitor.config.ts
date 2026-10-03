@@ -15,7 +15,7 @@ const config: CapacitorConfig = {
   appName: 'iHome Max',
   webDir: 'public',
   server: {
-    url: 'https://maximize-app1.vercel.app',
+    url: 'https://maximizeteam.ca',
     androidScheme: 'https',
     cleartext: false,
   },
@@ -25,6 +25,18 @@ const config: CapacitorConfig = {
   },
   android: {
     backgroundColor: '#0a1830',
+  },
+  // Keeps the native splash screen (navy background, set above) on screen
+  // until the web app explicitly hides it (see components/NativeSplashHide.tsx),
+  // instead of Capacitor dismissing it on its own after a few seconds. This
+  // is what fixes the "blank unresponsive screen" App Store rejection: the
+  // app used to hand off from splash to an empty WebView immediately, before
+  // the live site had finished loading over the network.
+  plugins: {
+    SplashScreen: {
+      launchAutoHide: false,
+      backgroundColor: '#0a1830',
+    },
   },
 };
 
