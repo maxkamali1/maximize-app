@@ -7,7 +7,9 @@ import { CHAT_SYSTEM_PROMPT } from "@/lib/chat/prompt";
 // The website assistant. Runs through Vercel AI Gateway, which authenticates
 // automatically on Vercel deployments (OIDC) — no API key to manage. Set
 // AI_GATEWAY_API_KEY only if you ever run this outside Vercel.
-const MODEL = process.env.CHAT_MODEL || "anthropic/claude-haiku-4.5";
+// Default is covered by Vercel's free monthly AI Gateway credit. Override with
+// the CHAT_MODEL env var in Vercel to switch models without a code change.
+const MODEL = process.env.CHAT_MODEL || "openai/gpt-4.1-mini";
 
 const MAX_MESSAGES = 30;
 const MAX_CHARS = 1500;
