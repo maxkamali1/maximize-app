@@ -68,7 +68,8 @@ export type LeadEventType =
   | "sent_message"
   | "requested_valuation"
   | "submitted_referral"
-  | "saved_investor_analysis";
+  | "saved_investor_analysis"
+  | "chatbot_lead";
 
 export interface LeadEvent {
   id: string;
@@ -171,6 +172,8 @@ export interface DataStore {
   referrals: Referral[];
   messages: Message[];
   investorAnalyses: InvestorAnalysis[];
+  // When the "chat assistant is down" email last went out (throttles alerts).
+  chatAlertLastSentAt?: string;
 }
 
 export const emptyStore: DataStore = {
