@@ -71,7 +71,11 @@ export async function POST(req: Request) {
       timeline: z.string().optional().describe("When they want to move/buy/sell"),
       budget: z.string().optional().describe("Budget or expected price range, in their words"),
       financingStatus: z.string().optional().describe("Mortgage pre-approval status, for buyers"),
-      propertyAddress: z.string().optional().describe("Address of the home they want to sell, if given"),
+      propertyAddress: z.string().optional().describe("Address of the home they want to sell or have evaluated, if given"),
+      wantsHomeEvaluation: z
+        .boolean()
+        .optional()
+        .describe("True if they asked for Max's free home evaluation"),
       summary: z.string().describe("2–3 sentence summary of the conversation for Max"),
     }),
     execute: async (lead) => {
@@ -101,8 +105,11 @@ export async function POST(req: Request) {
       // Logging the event is what triggers the email to Max (see lib/email.ts).
       await logLeadEvent({
         contactId: contact.id,
-        eventType: "chatbot_lead",
-        eventMeta: { summary: lead.summary },
+        eventType: lead.wantsHomeEvaluation ? "requested_valuation" : "chatbot_lead",
+        eventMeta: {
+          summary: lead.summary,
+          homeEvaluation: lead.wantsHomeEvaluation ? "Yes — requested a free home evaluation" : undefined,
+        },
       });
       leadSaved = true;
       return { ok: true };

@@ -49,4 +49,5 @@ export const FIELD_LABEL: Record<string, string> = {
   label: "Analysis label",
   budget: "Budget",
   summary: "Chat summary",
+  homeEvaluation: "Free home evaluation",
 };
