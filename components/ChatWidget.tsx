@@ -5,24 +5,14 @@ import { usePathname } from "next/navigation";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const GREETING: Msg = {
-  role: "assistant",
-  content:
-    "Hi! I'm Max's assistant at the MAXimize Team. Are you thinking about buying, selling, or investing?",
-};
+// Fired by <ChatLauncher /> (the in-page "Chat with us" button on the
+// homepage) to open the chat panel.
+export const OPEN_CHAT_EVENT = "maximize:open-chat";
 
-// Floating chat bubble for the website. Hidden inside the iHome Max native
-// app (which loads this same site) and on the internal /admin pages.
-export function ChatWidget() {
-  const pathname = usePathname();
-  const [isNative, setIsNative] = useState(true); // assume native until checked, so it never flashes in the app
-  const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([GREETING]);
-  const [input, setInput] = useState("");
-  const [sending, setSending] = useState(false);
-  const [leadSaved, setLeadSaved] = useState(false);
-  const listRef = useRef<HTMLDivElement>(null);
-
+// True inside the iHome Max native app (which loads this same site). Starts
+// as true so nothing chat-related ever flashes in the app before the check.
+export function useIsNative(): boolean {
+  const [isNative, setIsNative] = useState(true);
   useEffect(() => {
     let cancelled = false;
     import("@capacitor/core")
@@ -34,12 +24,42 @@ export function ChatWidget() {
       cancelled = true;
     };
   }, []);
+  return isNative;
+}
+
+const GREETING: Msg = {
+  role: "assistant",
+  content:
+    "Hi! I'm Max's assistant at the MAXimize Team. Are you thinking about buying, selling, or investing?",
+};
+
+// Floating chat bubble for the website. Hidden inside the iHome Max native
+// app (which loads this same site) and on the internal /admin pages.
+export function ChatWidget() {
+  const pathname = usePathname();
+  const isNative = useIsNative();
+  const [open, setOpen] = useState(false);
+  const [messages, setMessages] = useState<Msg[]>([GREETING]);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const [leadSaved, setLeadSaved] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const openChat = () => setOpen(true);
+    window.addEventListener(OPEN_CHAT_EVENT, openChat);
+    return () => window.removeEventListener(OPEN_CHAT_EVENT, openChat);
+  }, []);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, sending, open]);
 
   if (isNative || pathname?.startsWith("/admin")) return null;
+
+  // On the homepage the "Chat with us" button sits in the page itself (next
+  // to "I'm Just Exploring"), so the floating one is only shown elsewhere.
+  const showFloatingButton = pathname !== "/";
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
@@ -142,6 +162,7 @@ export function ChatWidget() {
         </div>
       )}
 
+      {showFloatingButton && (
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -158,6 +179,7 @@ export function ChatWidget() {
         </svg>
         {open ? "Close" : "Chat with us"}
       </button>
+      )}
     </div>
   );
 }
