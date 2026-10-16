@@ -68,7 +68,8 @@ export type LeadEventType =
   | "sent_message"
   | "requested_valuation"
   | "submitted_referral"
-  | "saved_investor_analysis";
+  | "saved_investor_analysis"
+  | "chatbot_lead";
 
 export interface LeadEvent {
   id: string;

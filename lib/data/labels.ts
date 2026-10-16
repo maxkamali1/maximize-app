@@ -11,6 +11,7 @@ export const EVENT_LABEL: Record<LeadEventType, string> = {
   saved_investor_analysis: "Saved an investment analysis",
   used_calculator: "Used the affordability calculator",
   onboarded: "New lead — just onboarded",
+  chatbot_lead: "Chatted with the website assistant",
 };
 
 // Which persona a lead came in as — used to tell two same-moment emails
@@ -46,4 +47,6 @@ export const FIELD_LABEL: Record<string, string> = {
   referredContact: "Referred contact info",
   propertyCount: "Properties compared",
   label: "Analysis label",
+  budget: "Budget",
+  summary: "Chat summary",
 };
