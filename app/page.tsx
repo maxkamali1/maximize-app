@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { BrandHeader } from "@/components/BrandHeader";
-import { ChatLauncher } from "@/components/ChatLauncher";
 
 const HERO_EMOJI: { icon: string; top: string; left: string; size: string; rotate: number; opacity: string }[] = [
   { icon: "🏠", top: "22%", left: "70%", size: "text-4xl", rotate: -10, opacity: "opacity-15" },
@@ -116,7 +115,6 @@ export default function Home() {
                 <p className="text-sm text-ink-soft">{goal.description}</p>
               </Link>
             ))}
-            <ChatLauncher />
           </div>
         </section>
       </main>
