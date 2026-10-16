@@ -76,7 +76,8 @@ export function ChatWidget() {
   return (
     <div
       className="fixed z-50 right-4 flex flex-col items-end gap-3"
-      style={{ bottom: "max(1rem, env(safe-area-inset-bottom))" }}
+      // Raised about an inch (6rem) above the corner so it sits clear of the page edge.
+      style={{ bottom: "calc(max(1rem, env(safe-area-inset-bottom)) + 6rem)" }}
     >
       {open && (
         <div
