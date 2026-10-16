@@ -140,3 +140,35 @@ export async function notifyMaxOfLeadEvent(
     console.error("notifyMaxOfLeadEvent threw:", err);
   }
 }
+
+// Sent when the website chat assistant fails to answer (most likely: the free
+// monthly AI Gateway credit ran out). Throttled by the caller — see
+// lib/chat/alert.ts — so a busy day doesn't flood the inbox.
+export async function notifyMaxOfChatOutage(reason: string): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+  try {
+    const { error } = await client.emails.send({
+      from: NOTIFY_FROM,
+      to: NOTIFY_TO,
+      subject: "Website chat assistant is down",
+      html: `
+        <p>The chat assistant on your website just failed to answer a visitor.</p>
+        <p><strong>Reason:</strong> ${escapeHtml(reason)}</p>
+        <p>If it mentions credit, a limit, or "free tier", your free monthly AI Gateway
+        credit has likely run out. It refills next month — or you can add credit in
+        Vercel &rarr; AI Gateway.</p>
+        <p>Visitors are being shown your number (416-723-0353) in the meantime.</p>
+        <p style="color:#999;font-size:12px;">You'll get at most one of these every 6 hours.</p>
+      `,
+    });
+    if (error) {
+      console.error("notifyMaxOfChatOutage: Resend returned an error:", error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("notifyMaxOfChatOutage threw:", err);
+    return false;
+  }
+}
