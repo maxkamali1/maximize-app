@@ -172,6 +172,8 @@ export interface DataStore {
   referrals: Referral[];
   messages: Message[];
   investorAnalyses: InvestorAnalysis[];
+  // When the "chat assistant is down" email last went out (throttles alerts).
+  chatAlertLastSentAt?: string;
 }
 
 export const emptyStore: DataStore = {
