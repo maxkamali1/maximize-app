@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { NativeSplashHide } from "@/components/NativeSplashHide";
+import { ChatWidget } from "@/components/ChatWidget";
 
 export const metadata: Metadata = {
   title: "MAXimize | RE/MAX West Realty Inc.",
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col font-body text-[16px] leading-relaxed antialiased bg-paper text-ink">
         <NativeSplashHide />
         {children}
+        <ChatWidget />
       </body>
     </html>
   );
