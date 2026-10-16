@@ -13,6 +13,7 @@ const PRIORITY: Record<LeadEventType, number> = {
   requested_showing: 0,
   requested_valuation: 0,
   sent_message: 1,
+  chatbot_lead: 1,
   submitted_referral: 2,
   saved_comparison: 2,
   saved_investor_analysis: 3,
