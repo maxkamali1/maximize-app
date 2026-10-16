@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createContact, createClientGoal, logLeadEvent } from "@/lib/data/repo";
 import type { GoalType } from "@/lib/data/types";
 import { CHAT_SYSTEM_PROMPT } from "@/lib/chat/prompt";
+import { alertChatOutage } from "@/lib/chat/alert";
 
 // The website assistant. Runs through Vercel AI Gateway, which authenticates
 // automatically on Vercel deployments (OIDC) — no API key to manage. Set
@@ -128,6 +129,8 @@ export async function POST(req: Request) {
     return Response.json({ reply, leadSaved });
   } catch (err) {
     console.error("chat route failed:", err);
+    // Awaited so the email isn't cut off when the serverless function freezes.
+    await alertChatOutage(err);
     return Response.json(
       {
         reply:
