@@ -1,4 +1,6 @@
 import type { ClientGoal, Contact, LeadEvent } from "./data/types";
+import { GOAL_LABEL } from "./data/labels";
+import { collectLeadDetails, detailsAsSentences } from "./lead-details";
 
 // Sends brand-new website leads into Max's kvCORE / BoldTrail CRM, so they
 // show up alongside every other lead (and trigger his kvCORE automations,
@@ -13,6 +15,12 @@ import type { ClientGoal, Contact, LeadEvent } from "./data/types";
 // public). Create it in BoldTrail: LeadEngine → Lead Dropbox → My API Tokens.
 
 const KVCORE_API_TOKEN = process.env.KVCORE_API_TOKEN;
+// When set (Vercel env var), new leads go to Max's Zapier "Website Lead"
+// workflow instead, WITH every detail they gave. That workflow creates the
+// BoldTrail contact (details in the Notes), has the AI call them knowing
+// what they asked for, and emails Max the call summary. The direct kvCORE
+// push below is then skipped so nobody is created or called twice.
+const LEAD_WEBHOOK_URL = process.env.ZAPIER_LEAD_WEBHOOK_URL;
 const KVCORE_CONTACT_URL = "https://api.kvcore.com/v2/public/contact";
 
 // The "source" kvCORE shows for these leads. Max's AI-call automation keys
@@ -61,8 +69,12 @@ export async function sendLeadToKvcore(
   contact: Contact,
   goal?: ClientGoal
 ): Promise<void> {
-  if (!KVCORE_API_TOKEN) return;
   if (!isNewWebsiteLead(event, contact)) return;
+  if (LEAD_WEBHOOK_URL) {
+    await sendLeadToZapier(event, contact, goal);
+    return;
+  }
+  if (!KVCORE_API_TOKEN) return;
 
   const { first, last } = splitName(contact.name);
   const phone = digitsOnly(contact.phone ?? "");
@@ -95,5 +107,51 @@ export async function sendLeadToKvcore(
     }
   } catch (err) {
     console.error("sendLeadToKvcore threw:", err);
+  }
+}
+
+async function sendLeadToZapier(
+  event: LeadEvent,
+  contact: Contact,
+  goal?: ClientGoal
+): Promise<void> {
+  const { first, last } = splitName(contact.name);
+  const details = collectLeadDetails(goal, [event]);
+  const ctx = goal?.context ?? {};
+  const str = (v: unknown) => (v === undefined || v === null ? "" : String(v));
+  const payload = {
+    first_name: first || "Website",
+    last_name: last || "Lead",
+    full_name: contact.name,
+    email: contact.email ?? "",
+    phone: digitsOnly(contact.phone ?? ""),
+    preferred_contact: contact.preferredContactMethod ?? "",
+    goal: goal?.goalType ?? "",
+    goal_label: goal ? GOAL_LABEL[goal.goalType] : "",
+    deal_type: dealType(goal) ?? "",
+    source: `${SOURCE_LABEL} - ${goal?.goalType ?? contact.source}`,
+    capture_method: contact.source === "website_chatbot" ? "Website chat assistant" : `Website ${goal?.goalType ?? ""} form`.trim(),
+    budget_min: str(ctx.budgetMin),
+    budget_max: str(ctx.budgetMax),
+    area: str(ctx.preferredArea || ctx.targetArea || ctx.area),
+    timeline: str(ctx.timeline),
+    financing: details.find((d) => d.key === "financingStatus")?.value ?? "",
+    property_address: str(ctx.address || event.eventMeta?.propertyAddress),
+    notes: str(ctx.notes),
+    details_text: detailsAsSentences(details),
+    details: details.map((d) => ({ label: d.label, value: d.value })),
+  };
+  try {
+    const res = await fetch(LEAD_WEBHOOK_URL as string, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) {
+      console.error(`sendLeadToZapier: webhook returned ${res.status}`);
+    }
+  } catch (err) {
+    console.error("sendLeadToZapier threw:", err);
   }
 }

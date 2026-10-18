@@ -49,6 +49,11 @@ export async function requireGoal(expected: GoalType): Promise<string> {
   return contactId;
 }
 
+// The optional "anything else Max should know?" box on every sign-up form.
+function notesFrom(formData: FormData): string {
+  return String(formData.get("notes") ?? "").trim().slice(0, 2000);
+}
+
 async function setContactCookie(contactId: string) {
   const jar = await cookies();
   jar.set(CONTACT_COOKIE, contactId, {
@@ -89,6 +94,7 @@ export async function submitBuyerOnboarding(formData: FormData) {
       timeline: String(formData.get("timeline") ?? ""),
       preferredArea: String(formData.get("preferredArea") ?? ""),
       financingStatus: String(formData.get("financingStatus") ?? ""),
+      notes: notesFrom(formData),
     },
   });
 
@@ -126,6 +132,7 @@ export async function submitSellerOnboarding(formData: FormData) {
       address,
       reasonForSelling: String(formData.get("reasonForSelling") ?? ""),
       timeline: String(formData.get("timeline") ?? ""),
+      notes: notesFrom(formData),
     },
   });
 
@@ -163,7 +170,7 @@ export async function submitHomeownerOnboarding(formData: FormData) {
   await createClientGoal({
     contactId: contact.id,
     goalType: "homeowner",
-    context: { address, purchaseDate, mortgageRenewalDate },
+    context: { address, purchaseDate, mortgageRenewalDate, notes: notesFrom(formData) },
   });
 
   await createHomeProfile({ contactId: contact.id, address, purchaseDate, mortgageRenewalDate });
@@ -200,6 +207,7 @@ export async function submitInvestorOnboarding(formData: FormData) {
     context: {
       targetArea: String(formData.get("targetArea") ?? ""),
       timeline: String(formData.get("timeline") ?? ""),
+      notes: notesFrom(formData),
     },
   });
 
@@ -232,7 +240,7 @@ export async function submitExploringOnboarding(formData: FormData) {
   await createClientGoal({
     contactId: contact.id,
     goalType: "exploring",
-    context: {},
+    context: { notes: notesFrom(formData) },
   });
 
   await logLeadEvent({ contactId: contact.id, eventType: "onboarded", eventMeta: { goal: "exploring" } });
