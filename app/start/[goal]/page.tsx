@@ -1,4 +1,5 @@
 import { BrandHeader } from "@/components/BrandHeader";
+import { SubmitButton } from "@/components/SubmitButton";
 import {
   submitBuyerOnboarding,
   submitSellerOnboarding,
@@ -125,12 +126,12 @@ export default async function StartGoalPage({
             </span>
           </label>
 
-          <button
-            type="submit"
+          <SubmitButton
+            pendingText="Sending…"
             className="mt-2 self-start rounded-full bg-accent text-accent-ink px-6 py-3 text-sm font-medium hover:bg-accent-strong transition-colors"
           >
             Take me to my dashboard →
-          </button>
+          </SubmitButton>
         </form>
       </main>
     </div>
