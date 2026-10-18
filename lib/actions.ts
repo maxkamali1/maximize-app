@@ -10,6 +10,7 @@ import {
   requestShowing as requestShowingRepo,
   saveComparison as saveComparisonRepo,
   markEventAttended,
+  markContactEventsAttended,
   getActiveGoal,
   seedSellerChecklist,
   createHomeProfile,
@@ -310,6 +311,12 @@ export async function adminLogoutAction() {
 export async function markAttended(eventId: string) {
   if (!(await isAdminAuthenticated())) redirect("/admin/login");
   await markEventAttended(eventId);
+  redirect("/admin");
+}
+
+export async function markContactAttended(contactId: string) {
+  if (!(await isAdminAuthenticated())) redirect("/admin/login");
+  await markContactEventsAttended(contactId);
   redirect("/admin");
 }
 

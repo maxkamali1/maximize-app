@@ -1,5 +1,6 @@
 import type { ClientGoal, Contact, LeadEvent } from "./data/types";
 import { GOAL_LABEL } from "./data/labels";
+import { readStore } from "./data/store";
 import { collectLeadDetails, detailsAsSentences } from "./lead-details";
 
 // Sends brand-new website leads into Max's kvCORE / BoldTrail CRM, so they
@@ -40,6 +41,36 @@ export function isNewWebsiteLead(event: LeadEvent, contact: Contact): boolean {
   return false;
 }
 
+// The same person sending the form again within a few minutes (a double
+// click, a refresh, pressing Back and re-submitting) must not create a second
+// CRM lead or a second AI call. Only the EARLIEST of the matching contacts is
+// sent; the rule is the same no matter which request checks first, so two
+// near-simultaneous submissions can't both skip or both send.
+const REPEAT_WINDOW_MS = 10 * 60 * 1000;
+
+async function isRepeatSubmission(contact: Contact): Promise<boolean> {
+  try {
+    const email = (contact.email ?? "").trim().toLowerCase();
+    const phone = digitsOnly(contact.phone ?? "");
+    if (!email && !phone) return false;
+    const created = Date.parse(contact.createdAt);
+    const store = await readStore();
+    return store.contacts.some((other) => {
+      if (other.id === contact.id) return false;
+      const sameEmail = email && (other.email ?? "").trim().toLowerCase() === email;
+      const samePhone = phone && digitsOnly(other.phone ?? "") === phone;
+      if (!sameEmail && !samePhone) return false;
+      const otherCreated = Date.parse(other.createdAt);
+      if (Math.abs(created - otherCreated) > REPEAT_WINDOW_MS) return false;
+      // "other" came first (ties broken by id) → this one is the repeat.
+      return otherCreated < created || (otherCreated === created && other.id < contact.id);
+    });
+  } catch (err) {
+    console.error("isRepeatSubmission failed:", err);
+    return false;
+  }
+}
+
 function splitName(full: string): { first: string; last: string } {
   const parts = full.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return { first: "", last: "" };
@@ -70,6 +101,7 @@ export async function sendLeadToKvcore(
   goal?: ClientGoal
 ): Promise<void> {
   if (!isNewWebsiteLead(event, contact)) return;
+  if (await isRepeatSubmission(contact)) return;
   if (LEAD_WEBHOOK_URL) {
     await sendLeadToZapier(event, contact, goal);
     return;
