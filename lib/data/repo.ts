@@ -147,6 +147,15 @@ export async function logLeadEvent(input: {
   return event;
 }
 
+// "Mark contacted" on a person clears everything they did, not just one action.
+export async function markContactEventsAttended(contactId: string): Promise<void> {
+  await writeStore((store) => {
+    for (const e of store.leadEvents) {
+      if (e.contactId === contactId) e.attendedTo = true;
+    }
+  });
+}
+
 export async function markEventAttended(eventId: string): Promise<void> {
   await writeStore((store) => {
     const event = store.leadEvents.find((e) => e.id === eventId);
