@@ -99,6 +99,20 @@ export default async function StartGoalPage({
 
           {config.body}
 
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-ink" htmlFor="notes">
+              Anything else Max should know?
+            </label>
+            <textarea
+              id="notes"
+              name="notes"
+              rows={3}
+              maxLength={2000}
+              placeholder="e.g. Must have a finished basement, close to schools, need to sell my condo first..."
+              className="rounded-lg border border-line-strong bg-paper px-3 py-2 text-sm placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
+
           <label className="flex items-start gap-2.5 text-sm text-ink-soft">
             <input
               type="checkbox"

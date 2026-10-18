@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { redirect } from "next/navigation";
 import { BrandHeader } from "@/components/BrandHeader";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
@@ -6,6 +7,23 @@ import { markAttended, resetAllLeads, adminLogoutAction } from "@/lib/actions";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import type { LeadEventType } from "@/lib/data/types";
 import { EVENT_LABEL } from "@/lib/data/labels";
+import { collectLeadDetails, type LeadDetail } from "@/lib/lead-details";
+
+function DetailList({ details }: { details: LeadDetail[] }) {
+  if (details.length === 0) {
+    return <p className="text-xs text-ink-faint mt-2">No extra details provided.</p>;
+  }
+  return (
+    <dl className="mt-3 grid sm:grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
+      {details.map((d) => (
+        <div key={d.key} className={d.value.length > 60 ? "sm:col-span-2" : undefined}>
+          <dt className="inline font-medium text-ink">{d.label}: </dt>
+          <dd className="inline text-ink-soft whitespace-pre-line">{d.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
 
 export const dynamic = "force-dynamic";
 
@@ -36,10 +54,14 @@ export default async function AdminPage() {
   const rows = await listContactsWithGoals();
 
   const attention = rows
-    .flatMap(({ contact, events }) =>
+    .flatMap(({ contact, events, goals }) =>
       events
         .filter((e) => !e.attendedTo)
-        .map((event) => ({ contact, event }))
+        .map((event) => ({
+          contact,
+          event,
+          details: collectLeadDetails(goals[0], events),
+        }))
     )
     .sort((a, b) => {
       const p = PRIORITY[a.event.eventType] - PRIORITY[b.event.eventType];
@@ -73,17 +95,17 @@ export default async function AdminPage() {
             </p>
           ) : (
             <div className="flex flex-col gap-3">
-              {attention.map(({ contact, event }) => (
+              {attention.map(({ contact, event, details }) => (
                 <div
                   key={event.id}
-                  className={`rounded-xl border p-5 flex items-center justify-between gap-4 flex-wrap ${
+                  className={`rounded-xl border p-5 flex items-start justify-between gap-4 flex-wrap ${
                     event.eventType === "requested_showing" ||
                     event.eventType === "requested_valuation"
                       ? "border-warn bg-warn/10"
                       : "border-line bg-surface"
                   }`}
                 >
-                  <div>
+                  <div className="flex-1 min-w-[240px]">
                     <p className="font-display text-lg font-semibold">{contact.name}</p>
                     <p className="text-sm text-ink-soft">
                       {EVENT_LABEL[event.eventType]}
@@ -94,6 +116,7 @@ export default async function AdminPage() {
                     <p className="font-data text-xs text-ink-faint mt-1">
                       {timeAgo(event.occurredAt)} &middot; {contact.email} &middot; {contact.phone}
                     </p>
+                    <DetailList details={details} />
                   </div>
                   <form action={markAttended.bind(null, event.id)}>
                     <button
@@ -135,14 +158,24 @@ export default async function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map(({ contact, goals }) => (
-                  <tr key={contact.id} className="border-b border-line last:border-0">
-                    <td className="px-4 py-3 font-medium">{contact.name}</td>
-                    <td className="px-4 py-3 capitalize">{goals[0]?.goalType ?? "—"}</td>
-                    <td className="px-4 py-3 text-ink-soft">{contact.source}</td>
-                    <td className="px-4 py-3 text-ink-soft">{contact.email}</td>
-                    <td className="px-4 py-3 font-data text-ink-faint">{timeAgo(contact.createdAt)}</td>
-                  </tr>
+                {rows.map(({ contact, goals, events }) => (
+                  <Fragment key={contact.id}>
+                    <tr className="border-t border-line">
+                      <td className="px-4 pt-3 font-medium">{contact.name}</td>
+                      <td className="px-4 pt-3 capitalize">{goals[0]?.goalType ?? "—"}</td>
+                      <td className="px-4 pt-3 text-ink-soft">{contact.source}</td>
+                      <td className="px-4 pt-3 text-ink-soft">
+                        {contact.email}
+                        {contact.phone ? <><br />{contact.phone}</> : null}
+                      </td>
+                      <td className="px-4 pt-3 font-data text-ink-faint">{timeAgo(contact.createdAt)}</td>
+                    </tr>
+                    <tr>
+                      <td colSpan={5} className="px-4 pb-4">
+                        <DetailList details={collectLeadDetails(goals[0], events)} />
+                      </td>
+                    </tr>
+                  </Fragment>
                 ))}
                 {rows.length === 0 && (
                   <tr>

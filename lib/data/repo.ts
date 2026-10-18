@@ -1,5 +1,6 @@
 import { readStore, writeStore, newId } from "./store";
 import { notifyMaxOfLeadEvent } from "../email";
+import { sendLeadToKvcore } from "../kvcore";
 import type {
   Contact,
   ClientGoal,
@@ -138,6 +139,8 @@ export async function logLeadEvent(input: {
       // swallows its own errors, so this never throws or blocks the lead
       // from being saved.
       await notifyMaxOfLeadEvent(event, contact, goal);
+      // Brand-new leads also go into kvCORE (fail-soft, same as the email).
+      await sendLeadToKvcore(event, contact, goal);
     }
   }
 
