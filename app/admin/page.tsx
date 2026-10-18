@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { BrandHeader } from "@/components/BrandHeader";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
 import { listContactsWithGoals } from "@/lib/data/repo";
-import { markAttended, resetAllLeads, adminLogoutAction } from "@/lib/actions";
+import { markContactAttended, resetAllLeads, adminLogoutAction } from "@/lib/actions";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import type { LeadEventType } from "@/lib/data/types";
 import { EVENT_LABEL } from "@/lib/data/labels";
@@ -27,17 +27,12 @@ function DetailList({ details }: { details: LeadDetail[] }) {
 
 export const dynamic = "force-dynamic";
 
-const PRIORITY: Record<LeadEventType, number> = {
-  requested_showing: 0,
-  requested_valuation: 0,
-  sent_message: 1,
-  chatbot_lead: 1,
-  submitted_referral: 2,
-  saved_comparison: 2,
-  saved_investor_analysis: 3,
-  used_calculator: 3,
-  onboarded: 4,
-};
+const URGENT: LeadEventType[] = ["requested_showing", "requested_valuation"];
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function isRecent(iso: string): boolean {
+  return Date.now() - new Date(iso).getTime() < DAY_MS;
+}
 
 function timeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -53,22 +48,34 @@ export default async function AdminPage() {
 
   const rows = await listContactsWithGoals();
 
+  // One card per person who has anything new, newest activity on top —
+  // so a lead that came in a minute ago is always the first thing you see.
   const attention = rows
-    .flatMap(({ contact, events, goals }) =>
-      events
+    .map(({ contact, events, goals }) => {
+      const open = events
         .filter((e) => !e.attendedTo)
-        .map((event) => ({
-          contact,
-          event,
-          details: collectLeadDetails(goals[0], events),
-        }))
-    )
-    .sort((a, b) => {
-      const p = PRIORITY[a.event.eventType] - PRIORITY[b.event.eventType];
-      if (p !== 0) return p;
-      return a.event.occurredAt < b.event.occurredAt ? 1 : -1;
-    });
-
+        .sort((x, y) => (x.occurredAt < y.occurredAt ? 1 : -1));
+      if (open.length === 0) return null;
+      // Each kind of action once, with when it last happened.
+      const actions: { type: LeadEventType; at: string; address?: string }[] = [];
+      for (const e of open) {
+        if (actions.some((x) => x.type === e.eventType)) continue;
+        actions.push({
+          type: e.eventType,
+          at: e.occurredAt,
+          address: e.eventMeta?.propertyAddress as string | undefined,
+        });
+      }
+      return {
+        contact,
+        latest: open[0].occurredAt,
+        urgent: open.some((e) => URGENT.includes(e.eventType)),
+        actions,
+        details: collectLeadDetails(goals[0], events),
+      };
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null)
+    .sort((x, y) => (x.latest < y.latest ? 1 : -1));
   return (
     <div className="flex flex-col flex-1">
       <BrandHeader eyebrow="Admin — internal only" />
@@ -95,30 +102,39 @@ export default async function AdminPage() {
             </p>
           ) : (
             <div className="flex flex-col gap-3">
-              {attention.map(({ contact, event, details }) => (
+              {attention.map(({ contact, latest, urgent, actions, details }) => {
+                const isNew = isRecent(latest);
+                return (
                 <div
-                  key={event.id}
+                  key={contact.id}
                   className={`rounded-xl border p-5 flex items-start justify-between gap-4 flex-wrap ${
-                    event.eventType === "requested_showing" ||
-                    event.eventType === "requested_valuation"
-                      ? "border-warn bg-warn/10"
-                      : "border-line bg-surface"
+                    urgent ? "border-warn bg-warn/10" : "border-line bg-surface"
                   }`}
                 >
                   <div className="flex-1 min-w-[240px]">
-                    <p className="font-display text-lg font-semibold">{contact.name}</p>
-                    <p className="text-sm text-ink-soft">
-                      {EVENT_LABEL[event.eventType]}
-                      {event.eventMeta?.propertyAddress
-                        ? ` — ${event.eventMeta.propertyAddress}`
-                        : ""}
+                    <p className="font-display text-lg font-semibold flex items-center gap-2">
+                      {contact.name}
+                      {isNew && (
+                        <span className="font-data text-[0.65rem] uppercase tracking-wide rounded-full bg-accent text-accent-ink px-2 py-0.5">
+                          New
+                        </span>
+                      )}
                     </p>
                     <p className="font-data text-xs text-ink-faint mt-1">
-                      {timeAgo(event.occurredAt)} &middot; {contact.email} &middot; {contact.phone}
+                      {timeAgo(latest)} &middot; {contact.email} &middot; {contact.phone}
                     </p>
+                    <ul className="mt-2 text-sm text-ink-soft list-disc pl-5">
+                      {actions.map((a) => (
+                        <li key={a.type}>
+                          {EVENT_LABEL[a.type]}
+                          {a.address ? ` — ${a.address}` : ""}
+                          <span className="text-ink-faint"> &middot; {timeAgo(a.at)}</span>
+                        </li>
+                      ))}
+                    </ul>
                     <DetailList details={details} />
                   </div>
-                  <form action={markAttended.bind(null, event.id)}>
+                  <form action={markContactAttended.bind(null, contact.id)}>
                     <button
                       type="submit"
                       className="rounded-full border border-line-strong px-4 py-2 text-sm font-medium hover:border-accent hover:text-accent transition-colors"
@@ -127,7 +143,8 @@ export default async function AdminPage() {
                     </button>
                   </form>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
