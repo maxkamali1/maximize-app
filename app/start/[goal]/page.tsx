@@ -7,6 +7,7 @@ import {
   submitInvestorOnboarding,
   submitExploringOnboarding,
 } from "@/lib/actions";
+import { issueFormToken, HONEYPOT_FIELD, FORM_TOKEN_FIELD } from "@/lib/spam-guard";
 
 export default async function StartGoalPage({
   params,
@@ -53,6 +54,8 @@ export default async function StartGoalPage({
     },
   }[goal as "buying" | "selling" | "homeowner" | "investing" | "exploring"];
 
+  const formToken = issueFormToken();
+
   if (!config) {
     return (
       <div className="flex flex-col flex-1">
@@ -75,6 +78,13 @@ export default async function StartGoalPage({
         <p className="text-ink-soft mb-8">{config.lede}</p>
 
         <form action={config.action} className="flex flex-col gap-5">
+          {/* Bot protection: a signed "form opened at" stamp, plus a trap field
+              hidden from real visitors that only bots fill in. */}
+          <input type="hidden" name={FORM_TOKEN_FIELD} value={formToken} />
+          <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", width: 1, height: 1, overflow: "hidden" }}>
+            <label htmlFor={HONEYPOT_FIELD}>Leave this field empty</label>
+            <input id={HONEYPOT_FIELD} name={HONEYPOT_FIELD} type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
+          </div>
           <div className="grid sm:grid-cols-2 gap-5">
             <Field label="Your name" name="name" required placeholder="Jordan Lee" />
             <Field label="Email" name="email" type="email" required placeholder="jordan@email.com" />

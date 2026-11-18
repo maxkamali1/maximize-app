@@ -24,6 +24,7 @@ import {
   resetAllLeadsRepo,
 } from "./data/repo";
 import type { ComparisonItem, GoalType, PreferredContactMethod } from "./data/types";
+import { detectSpam } from "./spam-guard";
 import { verifyAdminCode, startAdminSession, endAdminSession, isAdminAuthenticated } from "./admin-auth";
 
 const CONTACT_COOKIE = "maximize_contact_id";
@@ -55,6 +56,16 @@ function notesFrom(formData: FormData): string {
   return String(formData.get("notes") ?? "").trim().slice(0, 2000);
 }
 
+// Bot check for every public sign-up form. A flagged submission is dropped
+// silently (nothing saved, no alert email) and bounced back to the home page.
+async function blockBots(formData: FormData) {
+  const reason = await detectSpam(formData);
+  if (reason) {
+    console.warn(`[spam-guard] blocked sign-up: ${reason}`);
+    redirect("/");
+  }
+}
+
 async function setContactCookie(contactId: string) {
   const jar = await cookies();
   jar.set(CONTACT_COOKIE, contactId, {
@@ -66,6 +77,7 @@ async function setContactCookie(contactId: string) {
 }
 
 export async function submitBuyerOnboarding(formData: FormData) {
+  await blockBots(formData);
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
@@ -105,6 +117,7 @@ export async function submitBuyerOnboarding(formData: FormData) {
 }
 
 export async function submitSellerOnboarding(formData: FormData) {
+  await blockBots(formData);
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
@@ -145,6 +158,7 @@ export async function submitSellerOnboarding(formData: FormData) {
 }
 
 export async function submitHomeownerOnboarding(formData: FormData) {
+  await blockBots(formData);
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
@@ -182,6 +196,7 @@ export async function submitHomeownerOnboarding(formData: FormData) {
 }
 
 export async function submitInvestorOnboarding(formData: FormData) {
+  await blockBots(formData);
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
@@ -218,6 +233,7 @@ export async function submitInvestorOnboarding(formData: FormData) {
 }
 
 export async function submitExploringOnboarding(formData: FormData) {
+  await blockBots(formData);
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
